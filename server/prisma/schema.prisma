@@ -1,0 +1,189 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String    @id @default(uuid())
+  name            String
+  email           String    @unique
+  phone           String
+  password        String
+  role            Role      @default(USER)
+  status          UserStatus @default(PENDING)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  rentals         Rental[]
+  transactions    Transaction[]
+   chats           ChatParticipant[]
+  messages        Message[]
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum UserStatus {
+  PENDING
+  VERIFIED
+  SUSPENDED
+}
+
+model Scooter {
+  id              String    @id @default(uuid())
+  scooterId       String    @unique // From UI: "01906912", "37890606", etc.
+  model           String    // From UI: "TMX01", "TMX09", etc.
+  owner           String?   // From UI: "Hegedűs Donát", "Hajdú Szilveszter", etc.
+  status          ScooterStatus @default(AVAILABLE)
+  maintenanceNote String?
+  location        Json?     // For map tracking
+  pricePerHour    Float
+  pricePerDay     Float?
+  addedAt         DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  rentals         Rental[]
+  maintenanceLogs MaintenanceLog[]
+}
+
+enum ScooterStatus {
+  AVAILABLE
+  ON_ROAD
+  OFFLINE
+  IN_MAINTENANCE
+}
+
+model Rental {
+  id              String    @id @default(uuid())
+  user            User      @relation(fields: [userId], references: [id])
+  userId          String
+  scooter         Scooter   @relation(fields: [scooterId], references: [id])
+  scooterId       String
+  startTime       DateTime
+  endTime         DateTime?
+  duration        String?   // From UI: "1.5 hours"
+  amount          Float?    // From UI: "₹450"
+  status          RentalStatus @default(IN_PROGRESS)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  transactions    Transaction[]
+}
+
+enum RentalStatus {
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model Transaction {
+  id              String    @id @default(uuid())
+  user            User      @relation(fields: [userId], references: [id])
+  userId          String
+  rental          Rental?   @relation(fields: [rentalId], references: [id])
+  rentalId        String?
+  amount          Float     // From UI: "₹1500", "₹2000", etc.
+  date            DateTime
+  type            TransactionType
+  status          TransactionStatus @default(PENDING)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+enum TransactionType {
+  RIDE_PAYMENT
+  BONUS
+  FINE
+  REFUND
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+model MaintenanceLog {
+  id              String    @id @default(uuid())
+  scooter         Scooter   @relation(fields: [scooterId], references: [id])
+  scooterId       String
+  description     String
+  cost            Float?
+  startDate       DateTime
+  endDate         DateTime?
+  maintenanceType String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Revenue {
+  id              String    @id @default(uuid())
+  date            DateTime
+  amount          Float
+  description     String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Expense {
+  id              String    @id @default(uuid())
+  date            DateTime
+  amount          Float
+  description     String
+  receipt         String?   // File path or URL
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model DailyStats {
+  id              String    @id @default(uuid())
+  date            DateTime  @unique
+  totalRevenue    Float     // From UI: "₹500"
+  income          Float     // From UI: "₹500"
+  expenses        Float     // From UI: "₹2500"
+  newUsers        Int
+  activeUsers     Int
+  completedRides  Int
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+
+model Chat {
+  id              String    @id @default(uuid())
+  participants    ChatParticipant[]
+  messages        Message[]
+  adminApproved   Boolean   @default(false)  // New field
+  isBlocked       Boolean   @default(false)  // New field
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model ChatParticipant {
+  id              String    @id @default(uuid())
+  chat            Chat      @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  chatId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String
+  unreadCount     Int       @default(0)
+  lastReadAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([chatId, userId])
+}
+
+model Message {
+  id              String    @id @default(uuid())
+  chat            Chat      @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  chatId          String
+  sender          User      @relation(fields: [senderId], references: [id])
+  senderId        String
+  content         String
+  isRead          Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
