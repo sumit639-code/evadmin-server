@@ -17,7 +17,7 @@ router.get('/:id', authenticateToken, bookingController.getBookingById);
 router.post('/', authenticateToken, bookingController.createBooking);
 
 // Update booking status
-router.patch('/:id/status', authenticateToken, bookingController.updateBookingStatus);
+router.put('/:id/status', authenticateToken, bookingController.updateBookingStatus);
 
 // Delete a booking (admin only)
 router.delete('/:id', authenticateToken, requireAdmin, bookingController.deleteBooking);

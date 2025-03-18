@@ -13,7 +13,7 @@ const ScooterImage = ({ model }) => {
     // and if model is defined
     if (!hasError && model) {
       try {
-        const modelImagePath = `/images/scooters/${model.toLowerCase().replace(/\s+/g, '-')}.jpg`;
+        const modelImagePath = `http://localhost:3000${model?.image}`;
         setImageSrc(modelImagePath);
       } catch (err) {
         // If any error occurs during path creation, use placeholder
@@ -204,7 +204,7 @@ const NewBooking = () => {
           <div className="md:w-1/3 p-4 bg-gray-50">
             <div className="relative">
               {/* Using the separate image component */}
-              <ScooterImage model={scooter.model} />
+              <ScooterImage model={scooter} />
             </div>
             <h2 className="text-xl font-semibold text-gray-800 mb-1">{scooter.model || 'Scooter'}</h2>
             <p className="text-gray-600 mb-4">ID: {scooter.scooterId || 'N/A'}</p>

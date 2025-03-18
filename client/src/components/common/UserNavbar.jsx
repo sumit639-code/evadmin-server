@@ -77,7 +77,7 @@ const UserNavbar = () => {
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
             <Link to="/" className="text-xl font-bold text-green-600">
-              ScooterRent
+            ECORYDS
             </Link>
           </div>
 
@@ -164,7 +164,7 @@ const UserNavbar = () => {
                         {user?.role || "Role"}
                       </p>
                     </div>
-                    <Link
+                    {/* <Link
                       to="/profile"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-green-600"
                     >
@@ -175,7 +175,7 @@ const UserNavbar = () => {
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-green-600"
                     >
                       Settings
-                    </Link>
+                    </Link> */}
                     <button
                       onClick={handleLogout}
                       className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-green-600"

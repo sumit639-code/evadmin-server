@@ -202,7 +202,12 @@ const RevenuePage = () => {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `revenue-data-${format(new Date(), 'yyyy-MM-dd')}.${format}`);
+      
+      // Use a date formatting library or native Date methods
+      const today = new Date();
+      const dateStr = today.toISOString().split('T')[0]; // Format: yyyy-MM-dd
+      
+      link.setAttribute('download', `revenue-data-${dateStr}.${format}`);
       document.body.appendChild(link);
       link.click();
       link.remove();

@@ -50,7 +50,7 @@ const Sidebar = () => {
     { path: '/scooter', icon: RiMotorbikeLine, label: 'Scooter Management' },
     // { path: '/rider', icon: RiUserLine, label: 'Ryder Details' },
     { path: '/users', icon: RiUserSettingsLine, label: 'User Management' },
-    { path: '/pending', icon: RiUserSettingsLine, label: 'Pending user ' },
+    // { path: '/pending', icon: RiUserSettingsLine, label: 'Pending user ' },
     { path: '/rental', icon: RiCarLine, label: 'Rental Vehicle' },
     { path: '/transaction', icon: RiMoneyDollarCircleLine, label: 'Transactions' },
     { path: '/revenue', icon: RiMoneyDollarCircleLine, label: 'Revenue' },
@@ -112,7 +112,7 @@ const Sidebar = () => {
             <RiChat1Line  className={`text-xl ${location.pathname === '/chats' ? 'text-white' : 'text-gray-500 group-hover:text-green-600'}`} />
             <span className="font-medium">Chat</span>
           </Link>
-          <Link
+          {/* <Link
             to="/settings"
             className={`flex items-center gap-3 px-4 py-3 my-1 rounded-lg transition-all duration-200 group
               ${location.pathname === '/settings'
@@ -122,7 +122,7 @@ const Sidebar = () => {
           >
             <RiSettings4Line className={`text-xl ${location.pathname === '/settings' ? 'text-white' : 'text-gray-500 group-hover:text-green-600'}`} />
             <span className="font-medium">Settings</span>
-          </Link>
+          </Link> */}
 
           <button className="flex items-center gap-3 px-4 py-3 my-1 rounded-lg w-full text-gray-700 hover:bg-green-50 hover:text-green-600 transition-all duration-200 group" onClick={handleLogout}>
             <RiLogoutBoxRLine className="text-xl text-gray-500 group-hover:text-green-600" />

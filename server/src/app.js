@@ -14,8 +14,17 @@ import revenueRoutes from "./routes/revenue.routes.js";
 import bookingRoutes from "./routes/booking.routes.js";
 import chatRoutes from "./routes/chat.routes.js"
 import adminRoutes from "./routes/admin.routes.js"
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const app = express();
 
+app.use(express.static(path.join(__dirname, 'public')));
+// OR if you need to be more specific:
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 // Middleware
 app.use(
   cors({
@@ -25,8 +34,11 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
-app.use(express.json());
+app.use(express.static('public'));
+// Increase body parser limits
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// app.use(express.json());
 app.use(cookieParser());
 
 // Routes

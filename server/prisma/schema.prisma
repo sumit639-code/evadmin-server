@@ -39,11 +39,12 @@ model Scooter {
   scooterId       String    @unique // From UI: "01906912", "37890606", etc.
   model           String    // From UI: "TMX01", "TMX09", etc.
   owner           String?   // From UI: "Hegedűs Donát", "Hajdú Szilveszter", etc.
-  status          ScooterStatus @default(AVAILABLE)
+  status          ScooterStatus @default(ON_ROAD)
   maintenanceNote String?
   location        Json?     // For map tracking
   pricePerHour    Float
   pricePerDay     Float?
+  image           String?   // Add this field for storing the image path
   addedAt         DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   rentals         Rental[]

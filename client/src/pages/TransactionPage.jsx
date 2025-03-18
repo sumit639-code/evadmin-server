@@ -171,7 +171,7 @@ const TransactionPage = () => {
     try {
       setLoading(true);
       
-      await axiosInstance.patch(`/transactions/${selectedTransaction.id}/status`, {
+      await axiosInstance.put(`/transactions/${selectedTransaction.id}/status`, {
         status: newStatus
       });
       
@@ -311,13 +311,13 @@ const TransactionPage = () => {
           {showFilters ? 'Hide Filters' : 'Show Filters'}
         </Button>
         
-        <Button 
+        {/* <Button 
           variant="contained" 
           startIcon={<DownloadIcon />}
           onClick={exportTransactions}
         >
           Export Data
-        </Button>
+        </Button> */}
       </Box>
 
       {showFilters && (

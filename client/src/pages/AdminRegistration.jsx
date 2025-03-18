@@ -46,47 +46,64 @@ const AdminRegistration = () => {
       setError("All fields are required");
       return false;
     }
-
+  
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
       return false;
     }
-
+  
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
       setError("Please enter a valid email address");
       return false;
     }
-
+  
     // Password strength validation
     if (formData.password.length < 8) {
       setError("Password must be at least 8 characters long");
       return false;
     }
-
-    return true;
+  
+    // Create a new object with concatenated name for backend submission
+    const dataForBackend = {
+      ...formData,
+      name: `${formData.firstName} ${formData.lastName}`,
+      // You can optionally remove firstName and lastName if not needed separately on backend
+      // firstName: undefined,
+      // lastName: undefined
+    };
+  
+    // Handle successful validation
+    setError("");
+    console.log("Form data validated successfully:", dataForBackend);
+    
+    // Here you would typically send dataForBackend to your API
+    // submitToBackend(dataForBackend);
+    
+    return dataForBackend;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!validateForm()) {
+  
+    const validatedData = validateForm();
+    if (!validatedData) {
       return;
     }
-
+  
     setLoading(true);
     setError("");
-
+  
     try {
       // Remove confirmPassword from the data sent to API
-      const { confirmPassword, ...adminData } = formData;
-
+      const { confirmPassword, ...adminData } = validatedData;
+      
       const response = await axiosInstance.post(
         "/auth/register-admin",
         adminData
       );
-
+  
       if (response.status === 201 || response.status === 200) {
         setSuccess(true);
         // Reset form after successful submission

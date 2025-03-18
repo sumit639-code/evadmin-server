@@ -253,12 +253,12 @@ const UserManagement = () => {
             <FiFilter />
             All Users
           </button>
-          <button 
+          {/* <button 
             className={`flex items-center gap-2 px-4 py-2 border rounded ${activeFilter === 'pending' ? 'bg-blue-50 border-blue-300' : 'bg-white hover:bg-gray-50'}`}
             onClick={() => setActiveFilter('pending')}
           >
             Pending
-          </button>
+          </button> */}
           <button 
             className={`flex items-center gap-2 px-4 py-2 border rounded ${activeFilter === 'verified' ? 'bg-blue-50 border-blue-300' : 'bg-white hover:bg-gray-50'}`}
             onClick={() => setActiveFilter('verified')}

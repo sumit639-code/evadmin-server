@@ -4,14 +4,17 @@ import { useAuth } from '../Context/AuthContext';
 import axiosInstance from '../utils/axiosInstance';
 
 // Component for image with fallback and loading state
-const ScooterImage = ({ model }) => {
+const ScooterImage = ({ scooter }) => {
   const [imgError, setImgError] = useState(false);
   const [loading, setLoading] = useState(true);
+  console.log(scooter)
+  // Get the backend URL - adjust this to match your backend server
+  const BACKEND_URL = 'http://localhost:3000'; // Change this to your backend URL
   
-  // Format model name for image path
-  const imgSrc = imgError 
+  // Use the image from the scooter object if available, otherwise fall back to placeholder
+  const imgSrc = imgError || !scooter?.image
     ? "/images/scooter-placeholder.jpg" 
-    : `/images/scooters/${model.toLowerCase().replace(/\s+/g, '-')}.jpg`;
+    : `${BACKEND_URL}${scooter?.image}`;
   
   return (
     <div className="relative w-full h-48 bg-gray-100 overflow-hidden">
@@ -22,7 +25,7 @@ const ScooterImage = ({ model }) => {
       )}
       <img 
         src={imgSrc}
-        alt={`${model} Scooter`}
+        alt={`${scooter?.model} Scooter`}
         className={`w-full h-48 object-cover transition-opacity duration-300 ${loading ? 'opacity-0' : 'opacity-100'}`}
         onError={() => setImgError(true)}
         onLoad={() => setLoading(false)}
@@ -97,6 +100,7 @@ const AvailableVehicles = () => {
         return 0;
     }
   });
+
 
   const handleBookNow = (scooterId) => {
     if (!user) {
@@ -280,7 +284,7 @@ const AvailableVehicles = () => {
             {sortedScooters.map((scooter) => (
               <div key={scooter.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
                 <div className="relative">
-                  <ScooterImage model={scooter.model} />
+                  <ScooterImage scooter={scooter} />
                   <div className="absolute top-3 right-3 bg-green-500 text-white py-1 px-3 rounded-full text-sm font-medium shadow-md">
                     Available Now
                   </div>

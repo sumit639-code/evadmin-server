@@ -275,7 +275,7 @@ const BookingHistoryPage = () => {
     try {
       setLoading(true);
 
-      await axiosInstance.patch(`/bookings/${selectedBooking.id}/status`, {
+      await axiosInstance.put(`/bookings/${selectedBooking.id}/status`, {
         status: newStatus,
       });
 

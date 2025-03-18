@@ -1,6 +1,44 @@
 import { PrismaClient } from '@prisma/client';
-
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 const prisma = new PrismaClient();
+
+
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const uploadDir = path.join(__dirname, '../public/uploads/scooters');
+
+// Make sure the directory exists
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// Helper function to save the image
+const saveImageToServer = (imageData, scooterId) => {
+  if (!imageData) return null;
+  
+  // Check if imageData is already a path (for updates where image didn't change)
+  if (imageData.startsWith('/uploads/')) {
+    return imageData;
+  }
+  
+  // Extract base64 data
+  const base64Data = imageData.split(',')[1];
+  if (!base64Data) return null;
+  
+  // Generate unique filename
+  const uniqueFileName = `scooter-${scooterId}-${Date.now()}.jpg`;
+  const filePath = path.join(uploadDir, uniqueFileName);
+  
+  // Write the file
+  const buffer = Buffer.from(base64Data, 'base64');
+  fs.writeFileSync(filePath, buffer);
+  
+  // Return the relative path for database storage
+  return `/uploads/scooters/${uniqueFileName}`;
+};
 
 /**
  * Get all scooters with optional filtering
@@ -52,6 +90,7 @@ export const getScooters = async (req, res) => {
         pricePerHour: true,
         pricePerDay: true,
         addedAt: true,
+        image: true,
         updatedAt: true
       },
       orderBy: {
@@ -130,13 +169,68 @@ export const getScooterById = async (req, res) => {
 /**
  * Create a new scooter
  */
+// export const createScooter = async (req, res) => {
+//   try {
+//     const { model, owner, status, maintenanceNote, pricePerHour, pricePerDay, location, scooterId } = req.body;
+    
+//     // Validate required fields
+//     if (!model || !owner || !pricePerHour) {
+//       return res.status(400).json({ message: 'Model, owner, and pricePerHour are required fields' });
+//     }
+
+//     // Convert UI status format to database enum format
+//     const statusMapping = {
+//       'On road': 'ON_ROAD',
+//       'In Maintenance': 'IN_MAINTENANCE',
+//       'Offline': 'OFFLINE'
+//     };
+
+//     // Create new scooter
+//     const newScooter = await prisma.scooter.create({
+//       data: {
+//         scooterId: scooterId || Date.now().toString(),
+//         model,
+//         owner,
+//         status: statusMapping[status] || 'ON_ROAD',
+//         maintenanceNote,
+//         pricePerHour,
+//         pricePerDay,
+//         location
+//       }
+//     });
+
+//     // Convert back to UI format for response
+//     const formattedScooter = {
+//       ...newScooter,
+//       status: Object.keys(statusMapping).find(key => statusMapping[key] === newScooter.status) || newScooter.status
+//     };
+
+//     return res.status(201).json({
+//       message: 'Scooter created successfully',
+//       scooter: formattedScooter
+//     });
+//   } catch (error) {
+//     console.error('Create scooter error:', error);
+//     return res.status(500).json({ message: 'Failed to create scooter', error: error.message });
+//   }
+// };
+
 export const createScooter = async (req, res) => {
   try {
-    const { model, owner, status, maintenanceNote, pricePerHour, pricePerDay, location, scooterId } = req.body;
+    const { model, owner, status, maintenanceNote, pricePerHour, pricePerDay, location, scooterId, imageData } = req.body;
     
     // Validate required fields
     if (!model || !owner || !pricePerHour) {
       return res.status(400).json({ message: 'Model, owner, and pricePerHour are required fields' });
+    }
+
+    // Generate a scooter ID if not provided
+    const newScooterId = scooterId || Date.now().toString();
+    
+    // Save image if provided
+    let imagePath = null;
+    if (imageData) {
+      imagePath = saveImageToServer(imageData, newScooterId);
     }
 
     // Convert UI status format to database enum format
@@ -149,14 +243,15 @@ export const createScooter = async (req, res) => {
     // Create new scooter
     const newScooter = await prisma.scooter.create({
       data: {
-        scooterId: scooterId || Date.now().toString(),
+        scooterId: newScooterId,
         model,
         owner,
         status: statusMapping[status] || 'ON_ROAD',
         maintenanceNote,
         pricePerHour,
         pricePerDay,
-        location
+        location,
+        image: imagePath // Store the image path
       }
     });
 
@@ -176,13 +271,11 @@ export const createScooter = async (req, res) => {
   }
 };
 
-/**
- * Update an existing scooter
- */
+
 export const updateScooter = async (req, res) => {
   try {
     const { id } = req.params;
-    const { model, owner, status, maintenanceNote, pricePerHour, pricePerDay, location, scooterId } = req.body;
+    const { model, owner, status, maintenanceNote, pricePerHour, pricePerDay, location, imageData } = req.body;
     
     // Check if scooter exists
     const existingScooter = await prisma.scooter.findUnique({
@@ -191,6 +284,23 @@ export const updateScooter = async (req, res) => {
 
     if (!existingScooter) {
       return res.status(404).json({ message: 'Scooter not found' });
+    }
+
+    // Save image if provided
+    let imagePath = existingScooter.image; // Default to existing image
+    if (imageData) {
+      // If imageData is a new image (not the existing path), save it
+      if (imageData !== existingScooter.image) {
+        imagePath = saveImageToServer(imageData, existingScooter.scooterId);
+        
+        // Delete the old image if it exists
+        if (existingScooter.image && existingScooter.image.startsWith('/uploads/')) {
+          const oldImagePath = path.join(__dirname, '../public', existingScooter.image);
+          if (fs.existsSync(oldImagePath)) {
+            fs.unlinkSync(oldImagePath);
+          }
+        }
+      }
     }
 
     // Convert UI status format to database enum format
@@ -211,7 +321,7 @@ export const updateScooter = async (req, res) => {
         ...(pricePerHour && { pricePerHour }),
         ...(pricePerDay !== undefined && { pricePerDay }),
         ...(location && { location }),
-        ...(scooterId && { scooterId })
+        ...(imagePath !== undefined && { image: imagePath })
       }
     });
 
@@ -230,6 +340,63 @@ export const updateScooter = async (req, res) => {
     return res.status(500).json({ message: 'Failed to update scooter', error: error.message });
   }
 };
+
+
+
+/**
+ * Update an existing scooter
+ */
+// export const updateScooter = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const { model, owner, status, maintenanceNote, pricePerHour, pricePerDay, location, scooterId } = req.body;
+    
+//     // Check if scooter exists
+//     const existingScooter = await prisma.scooter.findUnique({
+//       where: { id }
+//     });
+
+//     if (!existingScooter) {
+//       return res.status(404).json({ message: 'Scooter not found' });
+//     }
+
+//     // Convert UI status format to database enum format
+//     const statusMapping = {
+//       'On road': 'ON_ROAD',
+//       'In Maintenance': 'IN_MAINTENANCE',
+//       'Offline': 'OFFLINE'
+//     };
+
+//     // Update scooter
+//     const updatedScooter = await prisma.scooter.update({
+//       where: { id },
+//       data: {
+//         ...(model && { model }),
+//         ...(owner && { owner }),
+//         ...(status && { status: statusMapping[status] || existingScooter.status }),
+//         ...(maintenanceNote !== undefined && { maintenanceNote }),
+//         ...(pricePerHour && { pricePerHour }),
+//         ...(pricePerDay !== undefined && { pricePerDay }),
+//         ...(location && { location }),
+//         ...(scooterId && { scooterId })
+//       }
+//     });
+
+//     // Convert back to UI format for response
+//     const formattedScooter = {
+//       ...updatedScooter,
+//       status: Object.keys(statusMapping).find(key => statusMapping[key] === updatedScooter.status) || updatedScooter.status
+//     };
+
+//     return res.status(200).json({
+//       message: 'Scooter updated successfully',
+//       scooter: formattedScooter
+//     });
+//   } catch (error) {
+//     console.error('Update scooter error:', error);
+//     return res.status(500).json({ message: 'Failed to update scooter', error: error.message });
+//   }
+// };
 
 /**
  * Delete a scooter
@@ -365,7 +532,7 @@ export const getPublicAvailableScooters = async (req, res) => {
     // Build where condition for filtering
     const whereCondition = {
       // Only show available scooters to the public
-      status: 'AVAILABLE'
+      status: 'ON_ROAD'
     };
     
     // Filter by model if provided
@@ -390,6 +557,7 @@ export const getPublicAvailableScooters = async (req, res) => {
         model: true,
         pricePerHour: true,
         pricePerDay: true,
+        image: true,
         status: true
       },
       orderBy: {
@@ -421,6 +589,7 @@ export const getPublicScooterById = async (req, res) => {
         model: true,
         pricePerHour: true,
         pricePerDay: true,
+        image: true,
         status: true
       }
     });

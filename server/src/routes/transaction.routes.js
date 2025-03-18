@@ -11,7 +11,7 @@ const router = express.Router();
 router.get('/', authenticateToken, transactionController.getAllTransactions);
 router.get('/:id', authenticateToken, transactionController.getTransactionById);
 router.post('/', authenticateToken, requireAdmin, transactionController.createTransaction);
-router.patch('/:id/status', authenticateToken, requireAdmin, transactionController.updateTransactionStatus);
+router.put('/:id/status', authenticateToken, requireAdmin, transactionController.updateTransactionStatus);
 router.delete('/:id', authenticateToken, requireAdmin, transactionController.deleteTransaction);
 router.get('/stats', authenticateToken, requireAdmin, transactionController.getTransactionStats);
 

@@ -155,6 +155,7 @@ export const logoutUser = async (req, res) => {
 export const registerAdmin = async (req, res) => {
   try {
     const { name, email, phone, password } = req.body;
+    console.log(name, email, phone, password);
     
     // Validate required fields
     if (!name || !email || !phone || !password) {
