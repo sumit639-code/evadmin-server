@@ -228,7 +228,7 @@ export const updateBookingStatus = async (req, res) => {
     if (status === 'COMPLETED' && booking.scooter.status === 'ON_ROAD') {
       await prisma.scooter.update({
         where: { id: booking.scooterId },
-        data: { status: 'AVAILABLE' }
+        data: { status: 'ON_ROAD' }
       });
     }
     

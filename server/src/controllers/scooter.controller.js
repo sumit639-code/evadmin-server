@@ -104,7 +104,7 @@ export const getScooters = async (req, res) => {
         'ON_ROAD': 'On road',
         'IN_MAINTENANCE': 'In Maintenance',
         'OFFLINE': 'Offline',
-        'AVAILABLE': 'On road' // Assuming AVAILABLE is equivalent to On road in the UI
+        'AVAILABLE': 'Available' // Assuming AVAILABLE is equivalent to On road in the UI
       };
 
       return {
@@ -237,7 +237,8 @@ export const createScooter = async (req, res) => {
     const statusMapping = {
       'On road': 'ON_ROAD',
       'In Maintenance': 'IN_MAINTENANCE',
-      'Offline': 'OFFLINE'
+      'Offline': 'OFFLINE',
+      'Available': 'AVAILABLE',
     };
 
     // Create new scooter
@@ -307,7 +308,8 @@ export const updateScooter = async (req, res) => {
     const statusMapping = {
       'On road': 'ON_ROAD',
       'In Maintenance': 'IN_MAINTENANCE',
-      'Offline': 'OFFLINE'
+      'Offline': 'OFFLINE',
+      'Available': 'AVAILABLE',
     };
 
     // Update scooter
@@ -532,7 +534,7 @@ export const getPublicAvailableScooters = async (req, res) => {
     // Build where condition for filtering
     const whereCondition = {
       // Only show available scooters to the public
-      status: 'ON_ROAD'
+      status: 'AVAILABLE'
     };
     
     // Filter by model if provided

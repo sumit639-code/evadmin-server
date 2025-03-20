@@ -71,41 +71,46 @@ const ScooterData = () => {
       // Build query params for filtering
       const params = new URLSearchParams();
       if (selectedModel !== "All Models") {
-        params.append('model', selectedModel);
+        params.append("model", selectedModel);
       }
       if (selectedStatus !== "All Status") {
-        params.append('status', selectedStatus);
+        params.append("status", selectedStatus);
       }
-  
+
       const response = await axiosInstance.get(`/scooter?${params.toString()}`);
-      
+
       // Make sure image paths are properly handled
-      const processedScooters = response.data.scooters.map(scooter => {
+      const processedScooters = response.data.scooters.map((scooter) => {
         // Ensure the image path is complete
-        if (scooter.image && !scooter.image.startsWith('data:') && !scooter.image.startsWith('http')) {
+        if (
+          scooter.image &&
+          !scooter.image.startsWith("data:") &&
+          !scooter.image.startsWith("http")
+        ) {
           // If it's a relative path, make sure it works with your server
           // This depends on your server setup, but typically:
           return scooter;
         }
         return scooter;
       });
-      
+
       setScooters(processedScooters);
-      
+
       // If we're fetching all scooters (no model filter), update model options
       if (selectedModel === "All Models") {
-        const uniqueModels = [...new Set(processedScooters.map(scooter => scooter.model))];
+        const uniqueModels = [
+          ...new Set(processedScooters.map((scooter) => scooter.model)),
+        ];
         uniqueModels.sort(); // Sort models alphabetically
         setModelOptions(uniqueModels);
       }
     } catch (error) {
-      console.error('Error fetching scooters:', error);
-      toast.error('Failed to load scooters');
+      console.error("Error fetching scooters:", error);
+      toast.error("Failed to load scooters");
     } finally {
       setIsLoading(false);
     }
   };
-
 
   // Fetch maintenance logs for a specific scooter
   const fetchMaintenanceLogs = async (scooterId) => {
@@ -123,8 +128,10 @@ const ScooterData = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "On road":
+      case "Available":
         return "bg-green-100 text-green-800";
+      case "On road":
+        return "bg-gray-100 text-gray-800";
       case "In Maintenance":
         return "bg-yellow-100 text-yellow-800";
       case "Offline":
@@ -146,17 +153,17 @@ const ScooterData = () => {
 
   const handleRowClick = async (scooter) => {
     setSelectedScooter(scooter);
-    
+
     // If scooter has an image, set it as the preview
     if (scooter.image) {
       setImagePreview(scooter.image);
     } else {
       setImagePreview(null);
     }
-    
+
     setEditMode(false);
     setModalOpen(true);
-    
+
     // Fetch maintenance logs for the selected scooter
     await fetchMaintenanceLogs(scooter.id);
   };
@@ -401,14 +408,14 @@ const ScooterData = () => {
   const displayImage = (image) => {
     // If image is null/undefined, return null
     if (!image) return null;
-    
+
     // If it's already a data URL (starts with data:), return it as is
-    if (image.startsWith('data:')) {
+    if (image.startsWith("data:")) {
       return image;
     }
-    
+
     // If it's a server path, prepend the backend URL
-    const BACKEND_URL = 'http://localhost:3000'; // Replace with your actual backend URL
+    const BACKEND_URL = "http://localhost:3000"; // Replace with your actual backend URL
     return `${BACKEND_URL}${image}`;
   };
 
@@ -452,6 +459,7 @@ const ScooterData = () => {
             className="border border-gray-300 rounded-md text-sm py-2 px-3 text-gray-700 bg-white hover:bg-gray-50"
           >
             <option value="All Status">All Status</option>
+            <option value="Available">Available</option>
             <option value="On road">On road</option>
             <option value="In Maintenance">In Maintenance</option>
             <option value="Offline">Offline</option>
@@ -746,6 +754,7 @@ const ScooterData = () => {
                             className="border rounded px-2 py-1"
                           >
                             <option value="On road">On road</option>
+                            <option value="Available">Available</option>
                             <option value="In Maintenance">
                               In Maintenance
                             </option>

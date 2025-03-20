@@ -58,7 +58,7 @@ const MyBookings = () => {
     try {
       setCancellingId(bookingId);
       
-      const response = await axiosInstance.patch(`/bookings/${bookingId}/status`, {
+      const response = await axiosInstance.put(`/bookings/${bookingId}/status`, {
         status: 'CANCELLED'
       });
       

@@ -56,6 +56,7 @@ enum ScooterStatus {
   ON_ROAD
   OFFLINE
   IN_MAINTENANCE
+  
 }
 
 model Rental {

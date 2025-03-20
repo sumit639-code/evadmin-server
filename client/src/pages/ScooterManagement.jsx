@@ -16,7 +16,7 @@ const ScooterManagement = () => {
           <h1 className="text-2xl font-semibold">Scooter Management</h1>
         </div>
         <div className="absolute right-[27px]">
-          <TimeFrame />
+          {/* <TimeFrame /> */}
         </div>
       </div>
       

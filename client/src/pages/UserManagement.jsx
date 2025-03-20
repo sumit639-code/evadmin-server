@@ -65,7 +65,7 @@ const UserManagement = () => {
 
   const handleReject = async (userId) => {
     try {
-      await axiosInstance.put(`/auth/user-status/${userId}`, {
+      await axiosInstance.put(`/user/user-status/${userId}`, {
         status: 'SUSPENDED'
       }, {
         withCredentials: true
@@ -211,7 +211,7 @@ const UserManagement = () => {
     <div className="bg-gray-50 min-h-screen p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">User Management</h1>
-        <div className="flex items-center gap-4">
+        {/* <div className="flex items-center gap-4">
           <div className="flex items-center">
             <IoCalendarOutline className="text-gray-500 mr-2" />
             <span>Today</span>
@@ -222,7 +222,7 @@ const UserManagement = () => {
               <option>Previous period</option>
             </select>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Search and Filters */}
